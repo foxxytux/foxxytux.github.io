@@ -1,24 +1,212 @@
 <!DOCTYPE html>
-<style>
-  body {
-    color: red;
-    background-color: black;
-  }
-</style>
-<title>site of foxxy</title>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>site of foxxy</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            background: #000;
+            color: white;
+            font-family: monospace;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+        
+        .content {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .center {
+            width: 90%;
+            max-width: 800px;
+            border: 5px solid red;
+            padding: 20px;
+        }
+        
+        h1 {
+            margin-bottom: 10px;
+        }
+        
+        h2 {
+            margin-top: 20px;
+            margin-bottom: 10px;
+        }
+        
+        p {
+            margin: 8px 0;
+        }
+        
+        a {
+            color: #ff6666;
+        }
+        
+        ul {
+            list-style: none;
+            padding: 0;
+        }
+        
+        li {
+            margin-top: 15px;
+            font-weight: bold;
+        }
+        
+        li + p {
+            margin-left: 20px;
+            font-weight: normal;
+        }
+        
+        canvas {
+            display: block;
+            width: 100%;
+            height: 350px;
+            image-rendering: pixelated;
+            image-rendering: crisp-edges;
+        }
+        
+        .music-player {
+            background: #ffff2d;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        audio {
+            width: 100%;
+            max-width: 600px;
+        }
+    </style>
+</head>
 <body>
-  <h1>hello :3</h1>
-  <p>welcome to my site</p>
-  <p>you can contact me via <a href="mailto:foxxytux420@gmail.com">email</a>!</p>
-  <h2>faq</h2>
-  <ul>
-    <li>are you a furry?</li>
-    <p>no</p>
-    <li>which distro you use?</li>
-    <p>void and fedora</p>
-    <li>how old are you?</li>
-    <p>16</p>
-    <li>where are you from?</li>
-    <p>sadly turkey</p>
-  </ul>
+    <div class="content">
+        <div class="center">
+            <h1>hello :3</h1>
+            <p>welcome to my site</p>
+            <p>you can contact me via <a href="mailto:foxxytux420@gmail.com">email</a></p>
+            <p>i do my computing generally on a thinkpad x270 with void linux, but sometimes use either my desktop with ryzen 5 2600x and rtx 2060 or my elitebook 840 g3 with linux mint</p>
+            <h2>faq</h2>
+            <ul>
+                <li>are you a furry?</li>
+                <p>no</p>
+                <li>which distro you use?</li>
+                <p>void, mint and fedora</p>
+                <li>how old are you?</li>
+                <p>16</p>
+                <li>where are you from?</li>
+                <p>sadly turkey</p>
+            </ul>
+        </div>
+    </div>
+    
+    <canvas id="flameCanvas"></canvas>
+    
+    <div class="music-player">
+        <audio controls preload="metadata" autoplay>
+            <source src="https://psv4.vkuseraudio.net/s/v1/amp2/232FZsfubk36vjUSnBgY2SpNRZIIcsBADkMSJsXk1qht3D5x59yYc7VNqbdtXTE1KZnidXh1ZKRUC_5mDsINxEVGgt2zxNSuu3fbtxtn2n0cRDMdDI0DHByCsY2a8wqCjQlY45ktden8zRL1t7WPf-ffHz-gEQV0R01s.mp3?siren=1" type="audio/mpeg">
+        </audio>
+    </div>
+    
+    <script>
+        const canvas = document.getElementById('flameCanvas');
+        const ctx = canvas.getContext('2d');
+        
+        const width = 320;
+        const height = 200;
+        canvas.width = width;
+        canvas.height = height;
+        
+        const firePixels = new Uint8Array(width * height);
+        
+        const palette = [];
+        for (let i = 0; i < 256; i++) {
+            let r, g, b;
+            if (i < 32) {
+                r = 0;
+                g = 0;
+                b = 0;
+            } else if (i < 140) {
+                r = (i - 32) * 2.36;
+                g = (i - 32) * 1.15;
+                b = 0;
+            } else if (i < 220) {
+                r = 255;
+                g = 124 + (i - 140) * 1.64;
+                b = 0;
+            } else if (i < 250) {
+                r = 255;
+                g = 255;
+                b = (i - 220) * 1.5;
+            } else {
+                r = 255;
+                g = 255;
+                b = 45;
+            }
+            palette.push([r, g, b]);
+        }
+        
+        function initFire() {
+            for (let i = 0; i < width * height; i++) {
+                firePixels[i] = 0;
+            }
+        }
+        
+        function updateFire() {
+            for (let x = 0; x < width; x++) {
+                const bottomIndex = (height - 1) * width + x;
+                firePixels[bottomIndex] = Math.random() > 0.3 ? 255 : 220;
+            }
+            
+            for (let y = 0; y < height - 1; y++) {
+                for (let x = 0; x < width; x++) {
+                    const index = y * width + x;
+                    const below = (y + 1) * width + x;
+                    
+                    const decay = Math.floor(Math.random() * 3) + 1;
+                    const offset = Math.floor(Math.random() * 5) - 2;
+                    const targetX = Math.min(width - 1, Math.max(0, x + offset));
+                    const targetIndex = y * width + targetX;
+                    
+                    const newValue = Math.max(0, firePixels[below] - decay);
+                    firePixels[targetIndex] = newValue;
+                }
+            }
+        }
+        
+        function renderFire() {
+            const imageData = ctx.createImageData(width, height);
+            
+            for (let i = 0; i < firePixels.length; i++) {
+                const color = palette[firePixels[i]];
+                const pixelIndex = i * 4;
+                imageData.data[pixelIndex] = color[0];
+                imageData.data[pixelIndex + 1] = color[1];
+                imageData.data[pixelIndex + 2] = color[2];
+                imageData.data[pixelIndex + 3] = 255;
+            }
+            
+            ctx.putImageData(imageData, 0, 0);
+        }
+        
+        function animate() {
+            updateFire();
+            renderFire();
+            requestAnimationFrame(animate);
+        }
+        
+        initFire();
+        animate();
+    </script>
 </body>
+</html>
