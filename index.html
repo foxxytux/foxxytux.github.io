@@ -3,98 +3,94 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>site of foxxy</title>
+    <title>foxxy // root</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+        :root {
+            --bg: #080808;
+            --fg: #c0c0c0;
+            --accent: #ff4d4d;
+            --dim: #555;
+            --card: #111;
+        }
+        
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background: var(--bg); color: var(--fg); font-family: 'Courier New', monospace; padding: 20px; line-height: 1.4; }
+        
+        .terminal {
+            max-width: 850px;
+            margin: 40px auto;
+            background: var(--card);
+            border: 1px solid #222;
+            border-radius: 8px;
+            padding: 30px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
         }
 
-        body {
-            background: #000;
-            color: white;
-            font-family: monospace;
-            display: flex;
-            flex-direction: column;
-            min-height: 100vh;
-            justify-content: center;
-            align-items: center;
-        }
+        .prompt { color: var(--accent); margin-bottom: 20px; font-weight: bold; }
+        h1 { font-size: 1.5rem; margin-bottom: 5px; color: #fff; }
+        h2 { font-size: 1rem; color: var(--accent); margin: 30px 0 10px; text-transform: uppercase; letter-spacing: 2px; }
+        
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; }
+        ul { list-style: none; }
+        li::before { content: "» "; color: var(--accent); }
+        li { margin-bottom: 5px; font-size: 0.85rem; }
 
-        .center {
-            width: 90%;
-            max-width: 800px;
-            padding: 20px;
-            border: 2px solid red;
-        }
+        .status-bar { background: #1a1a1a; padding: 5px 15px; border-radius: 4px; font-size: 0.8rem; margin: 20px 0; border-left: 3px solid var(--accent); }
+        
+        a { color: var(--accent); text-decoration: none; border-bottom: 1px solid transparent; }
+        a:hover { border-bottom: 1px solid var(--accent); }
 
-        h1 {
-            margin-bottom: 10px;
-        }
+        .hardware-list b { color: #eee; font-weight: normal; }
+        .graveyard { opacity: 0.6; font-style: italic; }
 
-        h2 {
-            margin-top: 20px;
-            margin-bottom: 10px;
-        }
-
-        p {
-            margin: 8px 0;
-        }
-
-        a {
-            color: #ff6666;
-        }
-
-        ul {
-            list-style: none;
-            padding: 0;
-        }
-
-        li {
-            margin-top: 15px;
-            font-weight: bold;
-        }
-
-        li + p {
-            margin-left: 20px;
-            font-weight: normal;
-        }
-
-        .music-player {
-            margin-top: 30px;
-            display: flex;
-            justify-content: center;
-        }
-
-        audio {
-            width: 100%;
-            max-width: 600px;
-        }
+        audio { width: 100%; height: 28px; margin-top: 40px; opacity: 0.3; filter: grayscale(1) invert(1); }
     </style>
 </head>
 <body>
-    <div class="center">
-        <h1>hello :3</h1>
-        <p>welcome to my site</p>
-        <p>you can contact me via <a href="mailto:foxxytux420@gmail.com">email</a></p>
-        <p>i do my computing generally on a thinkpad t14 gen 2 with r7 5850u with arch or on my desktop with r5 2600x and rtx 2060 with ubuntu, but sometimes use either my asus vivobook x1502za with i3 1215u that has arch or my x270 with i5 6300u that has mint</p>
+    <div class="terminal">
+        <h1>foxxy's personal site</h1>
+        <p>16yo devops & hardware tinkerer from Turkey. <br>Building things, breaking devices, and hoarding microcontrollers.</p>
 
-        <h2>faq</h2>
-        <ul>
-            <li>which oses you use?</li>
-            <p>arch, ubuntu and mint</p>
-            <li>how old are you?</li>
-            <p>16</p>
-            <li>where are you from?</li>
-            <p>turkey</p>
+        <div class="status-bar">
+            <b>Current Mood:</b> r7 5850u is purring
+        </div>
+
+        <div class="grid">
+            <div>
+                <h2>Skills</h2>
+                <ul>
+                    <li>Python & Kotlin</li>
+                    <li>C / C++ (Embedded)</li>
+                    <li>Docker / n8n</li>
+                    <li>Arch, Ubuntu & Atlas OS</li>
+                </ul>
+            </div>
+            <div>
+                <h2>Hardware Lab</h2>
+                <ul>
+                    <li>STM32 Black/Blue Pills</li>
+                    <li>ESP32 / NodeMCU</li>
+                    <li>Raspberry Pi Pico</li>
+                    <li>Arduino Uno/Nano/Pro Micro</li>
+                </ul>
+            </div>
+        </div>
+
+        <h2>Workstations</h2>
+        <ul class="hardware-list">
+            <li><b>ThinkPad T14 G2:</b> The Daily Driver (Arch/GNOME)</li>
+            <li><b>Desktop Lab:</b> Ryzen 5 2600X / RTX 2060 (Ubuntu)</li>
+            <li><b>Asus Vivobook:</b> Mobile Lab (Arch)</li>
+            <li><b>ThinkPad X270:</b> Atlas OS</li>
         </ul>
 
-        <div class="music-player">
-            <audio controls preload="metadata" autoplay loop>
-                <source src="https://files.catbox.moe/p2exkv.mp3" type="audio/mpeg">
-            </audio>
-        </div>
+        <h2>Contact</h2>
+        <p>Email: <a href="mailto:foxxytux420@gmail.com">foxxytux420@gmail.com</a></p>
+        <p>Discord: <span style="color:var(--accent)">@foxxytux</span></p>
+
+        <audio controls autoplay loop>
+            <source src="https://file.garden/aZiCUeZ2KVa1kjiT/Bak.mp3" type="audio/mpeg">
+        </audio>
     </div>
 </body>
 </html>
