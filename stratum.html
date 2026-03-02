@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>STRATUM 🦊</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;900&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --glass: rgba(255, 255, 255, 0.1);
+            --glass-border: rgba(255, 255, 255, 0.3);
+            --accent: #58a6ff;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        
+        body { 
+            background: radial-gradient(at 0% 0%, #4facfe 0%, transparent 50%),
+                        radial-gradient(at 100% 0%, #00f2fe 0%, transparent 50%),
+                        radial-gradient(at 100% 100%, #7028e4 0%, transparent 50%),
+                        radial-gradient(at 0% 100%, #e5b2ca 0%, transparent 50%), #0d1117;
+            background-attachment: fixed; color: #fff; font-family: 'Inter', sans-serif;
+            height: 100vh; display: flex; overflow: hidden;
+        }
+
+        aside { 
+            width: 260px; margin: 20px; border-radius: 35px; background: rgba(255,255,255,0.05);
+            backdrop-filter: blur(50px) saturate(200%); border: 1px solid var(--glass-border);
+            display: flex; flex-direction: column; box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+        }
+
+        .logo { padding: 30px; font-weight: 900; text-align: center; font-size: 1.4rem; color: #fff; letter-spacing: -1px; }
+
+        .nav-list { flex: 1; padding: 15px; overflow-y: auto; }
+        .nav-item { 
+            margin: 8px 0; padding: 14px 20px; border-radius: 22px; cursor: pointer; transition: 0.3s; 
+            font-size: 13px; font-weight: 600; display: flex; align-items: center; gap: 12px; color: rgba(255,255,255,0.7);
+        }
+        .nav-item.active { background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.4); color: #fff; }
+
+        main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+        .header { height: 80px; padding: 0 40px; display: flex; align-items: center; justify-content: space-between; }
+
+        .workspace { flex: 1; display: flex; overflow: hidden; padding-bottom: 20px; }
+        .canvas { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 20px; }
+
+        .card { 
+            background: linear-gradient(135deg, rgba(255,255,255,0.18) 0%, rgba(255,255,255,0.05) 100%);
+            backdrop-filter: blur(35px) brightness(1.1); border: 1px solid var(--glass-border);
+            border-radius: 30px; padding: 24px; cursor: grab; position: relative;
+            transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2), inset 0 0 20px rgba(255,255,255,0.1);
+        }
+        .card:hover { transform: translateY(-3px); border-color: #fff; }
+
+        .card-h { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; font-size: 13px; font-weight: 800; color: #fff; }
+        .close-btn { 
+            cursor: pointer; opacity: 0.5; font-size: 20px; transition: 0.2s; 
+            width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border-radius: 50%;
+        }
+        .close-btn:hover { opacity: 1; background: rgba(255,255,255,0.2); color: #ff7b72; }
+
+        .preview { 
+            width: 500px; margin: 0 30px 20px 0; border-radius: 40px; background: rgba(0,0,0,0.65); 
+            backdrop-filter: blur(60px); border: 1px solid var(--glass-border); display: flex; flex-direction: column;
+        }
+        pre { flex: 1; padding: 30px; overflow: auto; font-family: 'Fira Code', monospace; font-size: 13px; color: #a5d6ff; line-height: 1.6; }
+
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; }
+        .fld { display: flex; flex-direction: column; gap: 4px; }
+        label { font-size: 9px; font-weight: 800; opacity: 0.6; text-transform: uppercase; }
+        input { background: rgba(0,0,0,0.4); border: 1px solid var(--glass-border); color: #fff; padding: 10px; border-radius: 12px; font-size: 11px; outline: none; }
+
+        .footer { padding: 20px 40px; display: flex; gap: 12px; overflow-x: auto; align-items: center; }
+        .btn { 
+            padding: 12px 24px; border-radius: 30px; border: 1px solid var(--glass-border); 
+            cursor: pointer; background: rgba(255,255,255,0.1); color: #fff; font-size: 12px; font-weight: 700; 
+            transition: 0.3s; backdrop-filter: blur(20px); white-space: nowrap;
+        }
+        .btn:hover { background: #fff; color: #000; }
+
+        .k { color: #ff7b72; font-weight: bold; } .v { color: #79c0ff; }
+    </style>
+</head>
+<body>
+    <aside><div class="logo">STRATUM 🦊</div><div class="nav-list" id="menu"></div></aside>
+    <main>
+        <div class="header"><h2 id="tool-name"></h2><button class="btn" style="background:#fff; color:#000" onclick="copy()">📦 COPY CONFIG</button></div>
+        <div class="workspace"><div class="canvas" id="canvas"></div><div class="preview"><pre id="out"></pre></div></div>
+        <div class="footer" id="actions"></div>
+    </main>
+
+<script>
+const DATA = {
+    docker: { name: 'Docker Compose', emoji: '🐳', res: {
+        app: { n: 'Service', f: { name: 'api', image: 'nginx:alpine', ports: '80:80' } },
+        vol: { n: 'Volume', f: { name: 'db_data', driver: 'local' } },
+        net: { n: 'Network', f: { name: 'frontend', driver: 'bridge' } }
+    }},
+    terraform: { name: 'Terraform', emoji: '🏗️', res: {
+        provider: { n: 'Provider', f: { name: 'aws', region: 'us-east-1' } },
+        vpc: { n: 'VPC', f: { name: 'main', cidr: '10.0.0.0/16' } },
+        subnet: { n: 'Subnet', f: { name: 'public', vpc_id: 'vpc-123', cidr: '10.0.1.0/24' } },
+        ec2: { n: 'EC2', f: { name: 'web', ami: 'ami-123', type: 't3.micro' } },
+        s3: { n: 'S3 Bucket', f: { name: 'assets-bucket' } },
+        custom: { n: 'Custom', f: { type: 'aws_lambda_function', name: 'my_func' } }
+    }},
+    ansible: { name: 'Ansible', emoji: '🤖', res: {
+        apt: { n: 'APT', f: { name: 'Nginx', pkg: 'nginx', state: 'present' } },
+        shell: { n: 'Shell', f: { name: 'cmd', cmd: 'ls -la' } },
+        ufw: { n: 'Firewall', f: { rule: 'allow', port: '80' } },
+        npm: { n: 'NPM', f: { name: 'pm2', global: 'yes' } },
+        pip: { n: 'PIP', f: { name: 'flask', state: 'present' } },
+        copy: { n: 'Copy', f: { src: './src', dest: '/opt/dest' } },
+        file: { n: 'File', f: { path: '/var/www', state: 'directory', mode: '0755' } },
+        git: { n: 'Git', f: { repo: 'https://github/fox', dest: '/opt/app', version: 'main' } },
+        service: { n: 'Service', f: { name: 'nginx', state: 'started', enabled: 'yes' } },
+        user: { n: 'User', f: { name: 'fox', state: 'present', shell: '/bin/bash' } },
+        cron: { n: 'Cron', f: { name: 'backup', minute: '0', hour: '2', job: '/opt/backup.sh' } },
+        template: { n: 'Template', f: { src: './cfg.j2', dest: '/etc/cfg.conf' } },
+        custom: { n: 'Custom', f: { name: 'Task', module: 'debug', msg: 'hello' } }
+    }},
+    k8s: { name: 'Kubernetes', emoji: '☸️', res: {
+        deploy: { n: 'Deployment', f: { name: 'web', image: 'nginx', replicas: '3', port: '80' } },
+        svc: { n: 'Service', f: { name: 'web-svc', port: '80', target: '80', type: 'ClusterIP' } },
+        ingress: { n: 'Ingress', f: { name: 'web-lg', host: 'fox.io', path: '/' } }
+    }},
+    gh_actions: { name: 'GH Actions', emoji: '🐙', res: {
+        workflow: { n: 'Workflow', immutable: true, f: { name: 'CI', on: 'push' } },
+        job: { n: 'Job', immutable: true, f: { runner: 'ubuntu-latest' } },
+        step: { n: 'Step', f: { name: 'Build', run: 'npm run build' } }
+    }},
+    jenkins: { name: 'Jenkins', emoji: '👷', res: {
+        core: { n: 'Pipeline', immutable: true, f: { agent: 'any' } },
+        env: { n: 'Env Var', f: { key: 'URL', value: 'localhost' } },
+        stage: { n: 'Stage', f: { name: 'Deploy', sh: 'sh ./deploy.sh' } }
+    }},
+    argocd: { name: 'ArgoCD', emoji: '🚀', res: {
+        app: { n: 'App', f: { name: 'api', repo: 'git@github', path: './k8s', ns: 'prod' } }
+    }}
+};
+
+let state = { tool: 'docker', data: { docker:[], terraform:[], ansible:[], gh_actions:[], k8s:[], jenkins:[], argocd:[] }};
+
+function init() {
+    state.data.gh_actions = [{id:'g1',kind:'workflow',v:{...DATA.gh_actions.res.workflow.f},immutable:true},{id:'g2',kind:'job',v:{...DATA.gh_actions.res.job.f},immutable:true}];
+    state.data.jenkins = [{id:'j1',kind:'core',v:{...DATA.jenkins.res.core.f},immutable:true}];
+    const menu = document.getElementById('menu'); menu.innerHTML = '';
+    Object.keys(DATA).forEach(k => {
+        const d = document.createElement('div'); d.className = `nav-item ${state.tool===k?'active':''}`;
+        d.innerHTML = `<span>${DATA[k].emoji}</span> ${DATA[k].name}`;
+        d.onclick = () => { state.tool=k; render(); }; menu.appendChild(d);
+    });
+    render();
+}
+
+function render() {
+    document.querySelectorAll('.nav-item').forEach((el, i) => el.classList.toggle('active', Object.keys(DATA)[i]===state.tool));
+    document.getElementById('tool-name').innerText = DATA[state.tool].name;
+    const c = document.getElementById('canvas'); const a = document.getElementById('actions');
+    c.innerHTML = ''; a.innerHTML = '';
+
+    Object.keys(DATA[state.tool].res).forEach(k => {
+        if (DATA[state.tool].res[k].immutable) return;
+        const b = document.createElement('button'); b.className = 'btn'; b.innerHTML = `+ ${DATA[state.tool].res[k].n}`;
+        b.onclick = () => { state.data[state.tool].push({ id: 'id-'+Date.now()+Math.random(), kind: k, v: {...DATA[state.tool].res[k].f} }); render(); }; a.appendChild(b);
+    });
+
+    state.data[state.tool].forEach(r => {
+        const card = document.createElement('div'); card.className = `card ${r.immutable?'immutable':''}`; card.dataset.id = r.id;
+        let flds = ''; for(let k in r.v) flds+=`<div class="fld"><label>${k}</label><input value="${r.v[k]}" oninput="update('${r.id}','${k}',this.value)"></div>`;
+        card.innerHTML = `<div class="card-h"><span>${DATA[state.tool].res[r.kind].n}</span>${!r.immutable?`<div class="close-btn" onclick="del('${r.id}')">×</div>`:''}</div><div class="grid">${flds}</div>`;
+        c.appendChild(card);
+    });
+    generate();
+}
+
+function update(id,k,v) { state.data[state.tool].find(x=>x.id===id).v[k]=v; generate(); }
+function del(id) { state.data[state.tool] = state.data[state.tool].filter(x=>x.id!==id); render(); }
+
+function generate() {
+    const t = state.tool; const items = state.data[t];
+    let code = `# STRATUM | ${t.toUpperCase()}\n\n`;
+
+    if(t==='docker') {
+        code += `services:\n` + items.filter(x=>x.kind==='app').map(i=>`  ${i.v.name}:\n    image: ${i.v.image}\n    ports: ["${i.v.ports}"]`).join('\n');
+        const v = items.filter(x=>x.kind==='vol'); 
+        if(v.length) code += `\n\nvolumes:\n` + v.map(i=>`  ${i.v.name}: { driver: ${i.v.driver} }`).join('\n');
+        const n = items.filter(x=>x.kind==='net');
+        if(n.length) code += `\n\nnetworks:\n` + n.map(i=>`  ${i.v.name}: { driver: ${i.v.driver} }`).join('\n');
+    } else if(t==='k8s') {
+        items.forEach(i => {
+            if(i.kind==='deploy') code += `apiVersion: apps/v1\nkind: Deployment\nmetadata: { name: ${i.v.name} }\nspec:\n  replicas: ${i.v.replicas}\n  template:\n    spec:\n      containers: [{ name: app, image: ${i.v.image} }]\n---\n`;
+            else if(i.kind==='svc') code += `apiVersion: v1\nkind: Service\nmetadata: { name: ${i.v.name} }\nspec:\n  type: ${i.v.type}\n  ports: [{ port: ${i.v.port}, targetPort: ${i.v.target} }]\n---\n`;
+            else code += `apiVersion: networking.k8s.io/v1\nkind: Ingress\nmetadata: { name: ${i.v.name} }\nspec:\n  rules: [{ host: ${i.v.host} }]\n---\n`;
+        });
+    } else if(t==='argocd') {
+        items.forEach(i => code += `apiVersion: argoproj.io/v1alpha1\nkind: Application\nmetadata: { name: ${i.v.name} }\nspec:\n  source: { repoURL: ${i.v.repo}, path: ${i.v.path} }\n  destination: { namespace: ${i.v.ns} }\n---\n`);
+    } else if(t==='ansible') {
+        code += `- hosts: all\n  tasks:\n`;
+        items.forEach(i => {
+            let m = i.kind==='custom' ? i.v.module : (['ufw','npm','pip','cron'].includes(i.kind) ? `community.general.${i.kind}` : `ansible.builtin.${i.kind}`);
+            code += `    - name: ${i.v.name || 'Task'}\n      ${m}:\n`;
+            for(let k in i.v) if(!['name','module'].includes(k)) code += `        ${k}: ${i.v[k]}\n`;
+        });
+    } else if(t==='terraform') {
+        items.forEach(i => {
+            if(i.kind==='provider') code += `provider "${i.v.name}" { region = "${i.v.region}" }\n\n`;
+            else if(i.kind==='custom') code += `resource "${i.v.type}" "${i.v.name}" { ... }\n\n`;
+            else code += `resource "aws_${i.kind}" "${i.v.name}" { ... }\n\n`;
+        });
+    } else if(t==='jenkins') {
+        const core = items.find(x=>x.kind==='core'); const envs = items.filter(x=>x.kind==='env');
+        code += `pipeline {\n  agent ${core?.v.agent}\n${envs.length ? '  environment {\n' + envs.map(e=>`    ${e.v.key} = '${e.v.value}'`).join('\n') + '\n  }\n' : ''}  stages {\n${items.filter(x=>x.kind==='stage').map(s=>`    stage('${s.v.name}') {\n      steps { sh '${s.v.sh}' }\n    }`).join('\n')}\n  }\n}`;
+    } else if(t==='gh_actions') {
+        const wf = items.find(x=>x.kind==='workflow'); const job = items.find(x=>x.kind==='job');
+        code += `name: ${wf?.v.name}\non: [${wf?.v.on}]\njobs:\n  build:\n    runs-on: ${job?.v.runner}\n    steps:\n      - uses: actions/checkout@v4\n${items.filter(x=>x.kind==='step').map(s=>`      - name: ${s.v.name}\n        run: ${s.v.run}`).join('\n')}`;
+    }
+
+    document.getElementById('out').innerHTML = code.replace(/\b(services|image|ports|hosts|tasks|pipeline|stage|environment|name|on|jobs|steps|spec|runs-on|agent|metadata|kind|apiVersion|volumes|networks)\b/g, '<span class="k">$1</span>').replace(/: (.*)$/gm, ': <span class="v">$1</span>');
+    document.getElementById('out').dataset.raw = code;
+}
+
+function copy() { navigator.clipboard.writeText(document.getElementById('out').dataset.raw); alert('Lensed & Copied! 💎🦊'); }
+init();
+</script>
+</body>
+</html>
